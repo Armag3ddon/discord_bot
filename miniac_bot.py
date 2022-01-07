@@ -210,7 +210,7 @@ def retrieve_gallery(user, conn):
     else:
         print("Error! Database connection was not established when querying a user's gallery.")
 
-async def set_name(user_points, member_id, discord_user_id):
+async def set_name(user_points, member_id):
     #If possible, use the members nick name on the server before their account name
     member = await client.get_guild(miniac_server_id).fetch_member(member_id)
     user_name = ''
@@ -294,7 +294,7 @@ async def increment_points_wrapper(message):
             return return_message
 
         # using the !add command to remove points
-        command = command_params[0]
+
         # remove non digit characters like !, @, <, or >
         discord_user_id = int(re.sub("\D", "", command_params[1]))
         points = command_params[2]
@@ -302,13 +302,13 @@ async def increment_points_wrapper(message):
         conn = sqlite3.connect(database)
         before_points, user_points = increment_points(discord_user_id, points, conn)
         conn.close
-        await set_name(user_points, discord_user_id, discord_user_id)
+        await set_name(user_points, discord_user_id)
         return_message = ":sob: Woops, {}. You now have {} points :sob:".format(client.get_user(discord_user_id).display_name,user_points)
         return return_message
 
     elif len(command_params) == 4:
         # using the !add command to actually add points
-        command = command_params[0]
+
         image_link = command_params[3]
         # remove non digit characters like !, @, <, or >
         discord_user_id = int(re.sub("\D", "", command_params[1]))
@@ -320,7 +320,7 @@ async def increment_points_wrapper(message):
         insert_link(discord_user_id, image_link, conn)
         conn.close
 
-        await set_name(user_points, discord_user_id, discord_user_id)
+        await set_name(user_points, discord_user_id)
         if user_points >= 50 and before_points < 50:
             return_message = ":moneybag: HOOTY HOO! You've earned your first emoji. FLEX ON THE HATERS WHO DON'T PAINT! :moneybag:"
 
@@ -343,7 +343,7 @@ async def increment_points_wrapper(message):
         return return_message
 
 
-def get_leaderboard(message):
+def get_leaderboard():
     discord_message = ''
     conn = sqlite3.connect(database)
     leaderboard = retrieve_sorted_leaderboard(conn)
@@ -413,7 +413,6 @@ def get_gallery(message):
         return_message = 'You need to tag a user with this command. Their name should appear blue in discord.'
         return return_message
 
-    command = command_params[0]
     # remove non digit characters like !, @, <, or >
     discord_user_id = int(re.sub("\D", "", command_params[1]))
     conn = sqlite3.connect(database)
@@ -474,7 +473,7 @@ async def on_message(message):
         await message.channel.send( 'Submit your models for points with this form: https://forms.gle/FkvMWfyCVgAZvGLd6')
 
     if message.content == '!leaderboard':
-        discord_message = get_leaderboard(message)
+        discord_message = get_leaderboard()
         await message.channel.send(discord_message)
 
     if message.content.startswith('!gallery'):
