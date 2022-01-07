@@ -301,7 +301,7 @@ async def increment_points_wrapper(message):
 
         conn = sqlite3.connect(database)
         before_points, user_points = increment_points(discord_user_id, points, conn)
-        conn.close
+        conn.close()
         await set_name(user_points, discord_user_id)
         return_message = ":sob: Woops, {}. You now have {} points :sob:".format(client.get_user(discord_user_id).display_name,user_points)
         return return_message
@@ -318,7 +318,7 @@ async def increment_points_wrapper(message):
         conn = sqlite3.connect(database)
         before_points, user_points = increment_points(discord_user_id, points, conn)
         insert_link(discord_user_id, image_link, conn)
-        conn.close
+        conn.close()
 
         await set_name(user_points, discord_user_id)
         if user_points >= 50 and before_points < 50:
