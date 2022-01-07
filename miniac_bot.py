@@ -423,7 +423,7 @@ def get_gallery(message):
     index = 1
     try:
         for link in gallery:
-            if((len(discord_private_message) + len(link[0])) > 2000):
+            if (len(discord_private_message) + len(link[0])) > 2000:
                 discord_private_message_list.append(discord_private_message)
                 discord_private_message = ""
 
