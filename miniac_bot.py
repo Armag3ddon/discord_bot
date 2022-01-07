@@ -296,7 +296,7 @@ async def increment_points_wrapper(message):
         # using the !add command to remove points
 
         # remove non digit characters like !, @, <, or >
-        discord_user_id = int(re.sub("\D", "", command_params[1]))
+        discord_user_id = int(re.sub(r"\D", "", command_params[1]))
         points = command_params[2]
 
         conn = sqlite3.connect(database)
@@ -311,7 +311,7 @@ async def increment_points_wrapper(message):
 
         image_link = command_params[3]
         # remove non digit characters like !, @, <, or >
-        discord_user_id = int(re.sub("\D", "", command_params[1]))
+        discord_user_id = int(re.sub(r"\D", "", command_params[1]))
         points = command_params[2]
         image_link = command_params[3]
 
@@ -394,7 +394,7 @@ def get_points(message):
             return_message = 'You need to tag a user with this command. Their name should appear blue in discord.'
             return return_message
 
-        discord_user_id = int(re.sub("\D", "", command_params[1]))
+        discord_user_id = int(re.sub(r"\D", "", command_params[1]))
         points = retrieve_user_points(conn, discord_user_id)
         return_message = "```{}: {}```".format(client.get_user(discord_user_id).display_name, points)
         conn.close()
@@ -414,7 +414,7 @@ def get_gallery(message):
         return return_message
 
     # remove non digit characters like !, @, <, or >
-    discord_user_id = int(re.sub("\D", "", command_params[1]))
+    discord_user_id = int(re.sub(r"\D", "", command_params[1]))
     conn = sqlite3.connect(database)
     gallery = retrieve_gallery(discord_user_id, conn)
     conn.close()
