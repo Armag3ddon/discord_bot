@@ -1,13 +1,17 @@
+"""
+Miniac Discord Bot
+"""
+
 #!/usr/bin/python3
 
-import discord
+import discord # pylint: disable=import-error
 import sqlite3
 import re
 import asyncio
 import random
 from sqlite3 import Error
 
-f = open("./discord_auth.txt")
+f = open("./discord_auth.txt", encoding="utf-8")
 lines=f.readlines()
 TOKEN = lines[0] 
 miniac_server_id = int(lines[1])
