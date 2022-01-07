@@ -443,11 +443,11 @@ def brian():
     This private messages you a discord user's personal gallery. These are all the pictures they've gotten points for. Make sure to actually tag the user, their name should appear blue.\n
     `!points [discord_user]`\n
     This command can be run with a parameter or without a parameter. If you want to find someone's point total, run "!points @[name-of-person]". If you want to know your own points, run "!points"\n
-    `!7years` \n
+    `!7years`\n
     Never do this.\n
     `!add [discord_user] [points] [link]`\n
     Only Wight Kings and Thralls can run this command. This increments your point total by [points], and adds a new image to your gallery.\n
-    `!brian`
+    `!brian` or `!help`\n
     This prints this message!
     """
     return return_message
@@ -488,7 +488,7 @@ async def on_message(message):
     if message.content.startswith('!points'):
         await message.channel.send( get_points(message))
 
-    if message.content == "!brian":
+    if message.content == "!brian" or message.content == "!help":
         await message.channel.send('{}'.format(brian()))
 
 @client.event
