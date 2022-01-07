@@ -13,7 +13,7 @@ from sqlite3 import Error
 
 f = open("./discord_auth.txt", encoding="utf-8")
 lines=f.readlines()
-TOKEN = lines[0] 
+TOKEN = lines[0]
 miniac_server_id = int(lines[1])
 miniac_general_channel_id = int(lines[2])
 miniac_welcome_channel_id = int(lines[3])
@@ -348,7 +348,7 @@ def get_leaderboard():
     conn = sqlite3.connect(database)
     leaderboard = retrieve_sorted_leaderboard(conn)
     conn.close()
-    discord_message = '' 
+    discord_message = ''
     if leaderboard is None:
         print("Leaderboard doesn't exist. Creating it now..")
         conn = sqlite3.connect(database)
