@@ -358,7 +358,7 @@ def get_leaderboard():
         conn = sqlite3.connect(DATABASE)
         create_leaderboard_table(conn)
         conn.close()
-    elif not len(leaderboard):
+    elif not leaderboard:
         return '```leaderboard is empty.```'
     else:
         x = 0
