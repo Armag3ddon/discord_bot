@@ -4,12 +4,13 @@ Miniac Discord Bot
 
 #!/usr/bin/python3
 
-import discord # pylint: disable=import-error
 import sqlite3
 import re
 import asyncio #pylint: disable=unused-import
 import random
 from sqlite3 import Error
+
+import discord # pylint: disable=import-error
 
 f = open("./discord_auth.txt", encoding="utf-8")
 lines=f.readlines()
