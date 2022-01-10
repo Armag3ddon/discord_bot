@@ -33,17 +33,17 @@ def create_user_table(user, conn):
     :param conn: connection to database
     :return: nothing
     """
-    create_user_query = """CREATE TABLE IF NOT EXISTS '{0}' (
+    create_user_query = f"""CREATE TABLE IF NOT EXISTS '{user}' (
                              id INTEGER PRIMARY KEY AUTOINCREMENT,
                              link text
-                           )""".format(user)
+                           )"""
     if conn is not None:
         try:
             with conn:
                 cur = conn.cursor()
                 cur.execute(create_user_query)
         except Error as e:
-            print("Failed to create user {0}. There error is below.".format(user))
+            print(f"Failed to create user {user}. There error is below.")
             print(e)
     else:
         print("Error! Database connection was not established before creating a user's table.")
@@ -79,14 +79,14 @@ def insert_link(user, link, conn):
     :return: nothing
     """
     create_user_table(user, conn)
-    insert_query = "INSERT INTO '{}' (link) VALUES ('{}')".format(user, link)
+    insert_query = f"INSERT INTO '{user}' (link) VALUES ('{link}')"
     if conn is not None:
         try:
             with conn:
                 cur = conn.cursor()
                 cur.execute(insert_query)
         except Error as e:
-            print("Failed to add image to {0}'s gallery. There error is below.".format(user))
+            print(f"Failed to add image to {user}'s gallery. There error is below.")
             print(e)
     else:
         print("Error! Database connection was not established before adding to a user's gallery.")
@@ -98,7 +98,7 @@ def find_user(user, conn):
     :param conn: connection to the database
     :return: a boolean as to whether or not the user exists in the database. Can be null if query fails.
     """
-    find_query = "SELECT rowid FROM leaderboard WHERE user = '{}'".format(user)
+    find_query = f"SELECT rowid FROM leaderboard WHERE user = '{user}'"
     if conn is not None:
         try:
             cur = conn.cursor()
@@ -106,7 +106,7 @@ def find_user(user, conn):
             data = cur.fetchall()
             return bool(len(data))
         except Error as e:
-            print("Failed when querying to find {}. The error is below.".format(user))
+            print(f"Failed when querying to find {user}. The error is below.")
             print(e)
     else:
         print("Error! Database connection was not established when trying to find a user")
@@ -119,9 +119,9 @@ def increment_points(user, points, conn):
     :param conn: connection to the database
     :return: tuple that contains the users points before the addition, and the curren total
     """
-    increment_query = "UPDATE leaderboard SET points = points + {0} WHERE user = '{1}'".format(points, user)
-    create_user_query = "INSERT INTO leaderboard (points, user) VALUES ({0}, '{1}')".format(points, user)
-    get_user_point = "SELECT points FROM leaderboard WHERE user='{}'".format(user)
+    increment_query = f"UPDATE leaderboard SET points = points + {points} WHERE user = '{user}'"
+    create_user_query = f"INSERT INTO leaderboard (points, user) VALUES ({points}, '{user}')"
+    get_user_point = f"SELECT points FROM leaderboard WHERE user='{user}'"
     if conn is not None:
         if find_user(user, conn):
             try:
@@ -129,7 +129,7 @@ def increment_points(user, points, conn):
                     cur = conn.cursor()
                     cur.execute(increment_query)
             except Error as e:
-                print('Failed to increment {}\'s points. Error is below.'.format(user))
+                print(f"Failed to increment {user}'s points. Error is below.")
                 print(e)
         else:
             try:
@@ -137,7 +137,7 @@ def increment_points(user, points, conn):
                     cur = conn.cursor()
                     cur.execute(create_user_query)
             except Error as e:
-                print('Failed to create {} in leaderboard. Error is below.'.format(user))
+                print(f"Failed to create {user} in leaderboard. Error is below.")
                 print(e)
         try:
             with conn:
@@ -147,7 +147,7 @@ def increment_points(user, points, conn):
                 return (int(current_points) - int(points), current_points)
 
         except Error as e:
-            print('Failed to get {}\'s current points. Error is below.'.format(user))
+            print(f"Failed to get {user}'s current points. Error is below.")
             print(e)
     else:
         print("Error! Database connection was not established when incrementing a user's point total")
@@ -179,7 +179,7 @@ def retrieve_user_points(conn, user):
     :param: user: the user in question
     :return: string int value of their point total.
     """
-    get_user_points_query = "SELECT points FROM leaderboard WHERE user = '{}'".format(user)
+    get_user_points_query = f"SELECT points FROM leaderboard WHERE user = '{user}'"
     if conn is not None:
         try:
             cur = conn.cursor()
@@ -188,7 +188,7 @@ def retrieve_user_points(conn, user):
         except TypeError:
             return "0"
         except Error as e:
-            print('Failed to retrieve {}\'s point total. Error is below.'.format(user))
+            print(f"Failed to retrieve {user}'s point total. Error is below.")
             print(e)
     else:
         print("Error! Database connection was not established when querying a user's point total.")
@@ -200,14 +200,14 @@ def retrieve_gallery(user, conn):
     :param conn: connection to the database
     :return: returns a list of tuples
     """
-    get_gallery_query = "SELECT link FROM '{}'".format(user)
+    get_gallery_query = f"SELECT link FROM '{user}'"
     if conn is not None:
         try:
             cur = conn.cursor()
             cur.execute(get_gallery_query)
             return cur.fetchall()
         except Error as e:
-            print('Failed to retrieve {}\'s gallery. Error is below.'.format(user))
+            print(f"Failed to retrieve {user}'s gallery. Error is below.")
             print(e)
     else:
         print("Error! Database connection was not established when querying a user's gallery.")
@@ -241,19 +241,19 @@ async def set_name(user_points, member_id):
         await member.edit(nick=user_name)
 
     if user_points >= 50 and user_points < 120:
-        new_nick = "{0} {1}".format(user_name, '\N{money bag}')
+        new_nick = f"{user_name} \N{money bag}"
         await member.edit(nick=new_nick)
 
     elif user_points >= 120 and user_points < 400:
-        new_nick = "{0} {1}".format(user_name, '\N{crossed swords}')
+        new_nick = f"{user_name} \N{crossed swords}"
         await member.edit(nick=new_nick)
 
     elif user_points >= 400 and user_points < 1000:
-        new_nick = "{0} {1}".format(user_name, '\N{crown}')
+        new_nick = f"{user_name} \N{crown}"
         await member.edit(nick=new_nick)
 
     elif user_points >= 1000:
-        new_nick = "{0} {1}".format(user_name, '\N{banana}')
+        new_nick = f"{user_name} \N{banana}"
         await member.edit(nick=new_nick)
 
 async def increment_points_wrapper(message):
@@ -305,7 +305,8 @@ async def increment_points_wrapper(message):
         before_points, user_points = increment_points(discord_user_id, points, conn)
         conn.close()
         await set_name(user_points, discord_user_id)
-        return_message = ":sob: Woops, {}. You now have {} points :sob:".format(client.get_user(discord_user_id).display_name,user_points)
+        display_name = client.get_user(discord_user_id).display_name
+        return_message = f":sob: Woops, {display_name}. You now have {user_points} points :sob:"
         return return_message
 
     elif len(command_params) == 4:
@@ -336,7 +337,8 @@ async def increment_points_wrapper(message):
             return_message = ":banana: LORD ALMIGHTY! You've earned your fourth and final emoji. You've ascended to minipainting godhood :banana:"
 
         else:
-            return_message = ":metal:Congratulations, {}. You now have {} points:metal:".format(client.get_user(discord_user_id).display_name,user_points)
+            display_name = client.get_user(discord_user_id).display_name
+            return_message = f":metal:Congratulations, {display_name}. You now have {user_points} points:metal:"
 
         return return_message
 
@@ -365,9 +367,9 @@ def get_leaderboard():
             member = client.get_user(int(leaderboard[y][0]))
             if member:
                 x +=1
-                discord_message += '{}: {}\n'.format(member.display_name, leaderboard[y][1])
+                discord_message += f'{member.display_name}: {leaderboard[y][1]}\n'
             y +=1
-        return '```{}```'.format(discord_message)
+        return f'```{discord_message}```'
 
 def get_points(message):
     conn = sqlite3.connect(DATABASE)
@@ -385,7 +387,7 @@ def get_points(message):
     if len(command_params) == 1:
         points = retrieve_user_points(conn, message.author.id)
         if int(points):
-            return_message = "```{}: {}```".format(message.author.display_name, points)
+            return_message = f"```{message.author.display_name}: {points}```"
         else:
             return_message = insults[random.randint(0,7)]
 
@@ -398,7 +400,8 @@ def get_points(message):
 
         discord_user_id = int(re.sub(r"\D", "", command_params[1]))
         points = retrieve_user_points(conn, discord_user_id)
-        return_message = "```{}: {}```".format(client.get_user(discord_user_id).display_name, points)
+        display_name = client.get_user(discord_user_id).display_name
+        return_message = f"```{display_name}: {points}```"
         conn.close()
         return return_message
     else:
@@ -429,7 +432,7 @@ def get_gallery(message):
                 discord_private_message_list.append(discord_private_message)
                 discord_private_message = ""
 
-            discord_private_message += '{}. {}\n'.format(index, link[0])
+            discord_private_message += f"{index}. {link[0]}\n"
             index += 1
 
         # Append the final message that didn't make it to 2k characters
@@ -460,9 +463,9 @@ def brian():
 # Custom welcome message
 @client.event
 async def on_member_join(member):
-    print("Recognized that " + member.name + " joined")
-    await client.get_channel(miniac_general_channel_id).send('Welcome to the Miniac Discord, {} Make sure to check out the <#537337389400719360> channel for all the information and rules!'.format(member.mention))
-    print("Sent message about " + member.name + " to #general")
+    print(f"Recognized that {member.name} joined")
+    await client.get_channel(miniac_general_channel_id).send(f"Welcome to the Miniac Discord, {member.mention} Make sure to check out the <#537337389400719360> channel for all the information and rules!")
+    print(f"Sent message about {member.name} to #general")
 
 @client.event
 async def on_message(message):
@@ -481,11 +484,12 @@ async def on_message(message):
     if message.content.startswith('!gallery'):
         discord_private_message_list = get_gallery(message)
         if len(message.content.split()) == 2:
-            await message.author.send("{}'s Gallery".format(message.content.split()[1]))
+            user = message.content.split()[1]
+            await message.author.send(f"{user}'s Gallery")
         else:
-            await message.author.send("{}'s Gallery".format(message.author.mention))
+            await message.author.send(f"{message.author.mention}'s Gallery")
         for discord_message in discord_private_message_list:
-            await message.author.send("{}".format(discord_message))
+            await message.author.send(f"{discord_message}")
 
     if message.content == "!7years":
         await message.channel.send( 'https://i.imgur.com/9NYdTDj.gifv')
@@ -494,7 +498,8 @@ async def on_message(message):
         await message.channel.send( get_points(message))
 
     if message.content == "!brian" or message.content == "!help":
-        await message.channel.send('{}'.format(brian()))
+        discord_message = brian()
+        await message.channel.send(brian())
 
 @client.event
 async def on_ready():
