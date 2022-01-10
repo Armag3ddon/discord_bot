@@ -24,7 +24,8 @@ intents = discord.Intents.default()
 intents.members = True
 
 client = discord.Client(intents=intents)
-database = "./points.db"
+DATABASE = "./points.db"
+
 def create_user_table(user, conn):
     """
     Create a table for a discord user that will contain links to their images.
@@ -300,7 +301,7 @@ async def increment_points_wrapper(message):
         discord_user_id = int(re.sub(r"\D", "", command_params[1]))
         points = command_params[2]
 
-        conn = sqlite3.connect(database)
+        conn = sqlite3.connect(DATABASE)
         before_points, user_points = increment_points(discord_user_id, points, conn)
         conn.close()
         await set_name(user_points, discord_user_id)
@@ -316,7 +317,7 @@ async def increment_points_wrapper(message):
         points = command_params[2]
         image_link = command_params[3]
 
-        conn = sqlite3.connect(database)
+        conn = sqlite3.connect(DATABASE)
         before_points, user_points = increment_points(discord_user_id, points, conn)
         insert_link(discord_user_id, image_link, conn)
         conn.close()
@@ -346,13 +347,13 @@ async def increment_points_wrapper(message):
 
 def get_leaderboard():
     discord_message = ''
-    conn = sqlite3.connect(database)
+    conn = sqlite3.connect(DATABASE)
     leaderboard = retrieve_sorted_leaderboard(conn)
     conn.close()
     discord_message = ''
     if leaderboard is None:
         print("Leaderboard doesn't exist. Creating it now..")
-        conn = sqlite3.connect(database)
+        conn = sqlite3.connect(DATABASE)
         create_leaderboard_table(conn)
         conn.close()
     elif not len(leaderboard):
@@ -369,7 +370,7 @@ def get_leaderboard():
         return '```{}```'.format(discord_message)
 
 def get_points(message):
-    conn = sqlite3.connect(database)
+    conn = sqlite3.connect(DATABASE)
     command_params = message.content.split()
     insults = [
             "Looks like you have no points. Time to PAINT MORE MINIS!",
@@ -416,7 +417,7 @@ def get_gallery(message):
 
     # remove non digit characters like !, @, <, or >
     discord_user_id = int(re.sub(r"\D", "", command_params[1]))
-    conn = sqlite3.connect(database)
+    conn = sqlite3.connect(DATABASE)
     gallery = retrieve_gallery(discord_user_id, conn)
     conn.close()
     discord_private_message = ''
