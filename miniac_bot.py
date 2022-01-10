@@ -1,8 +1,7 @@
+#!/usr/bin/python3
 """
 Miniac Discord Bot
 """
-
-#!/usr/bin/python3
 
 import sqlite3
 import re
