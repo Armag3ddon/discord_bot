@@ -213,6 +213,12 @@ def retrieve_gallery(user, conn):
         print("Error! Database connection was not established when querying a user's gallery.")
 
 async def set_name(user_points, member_id):
+    """
+    Change the user's nickname to include the correct emoji based on their points.
+    :param user_points: The current points of the user
+    :param member_id: The discord guild member ID of the user
+    :return: nothing
+    """
     #If possible, use the members nick name on the server before their account name
     member = await client.get_guild(miniac_server_id).fetch_member(member_id)
     user_name = ''
@@ -348,6 +354,10 @@ async def increment_points_wrapper(message):
 
 
 def get_leaderboard():
+    """
+    Get a discord friendly leader message with up to 10 leaderboard members.
+    :return: leaderboard string
+    """
     discord_message = ''
     conn = sqlite3.connect(DATABASE)
     leaderboard = retrieve_sorted_leaderboard(conn)
@@ -372,6 +382,11 @@ def get_leaderboard():
         return f'```{discord_message}```'
 
 def get_points(message):
+    """
+    Assemble the points info message.
+    :param message: this is a discord message containing all the params to run this function
+    :return: a message to print out in discord
+    """
     conn = sqlite3.connect(DATABASE)
     command_params = message.content.split()
     insults = [
@@ -410,6 +425,11 @@ def get_points(message):
         return return_message
 
 def get_gallery(message):
+    """
+    Assemble the gallery message.
+    :param message: this is a discord message containing all the params to run this function
+    :return: a message to print out in discord
+    """
     # split out the various params
     command_params = message.content.split()
     if len(command_params) != 2:
@@ -443,6 +463,10 @@ def get_gallery(message):
     return discord_private_message_list
 
 def brian():
+    """
+    The !brian or !help message.
+    :returns: message string
+    """
     return_message = """
     Hi, I'm Brian. You can call me Bryguy. I'm your friendly bot companion. Here are the commands you can do: \n
     `!leaderboard`\n
@@ -463,12 +487,22 @@ def brian():
 # Custom welcome message
 @client.event
 async def on_member_join(member):
+    """
+    Welcome new members to the server.
+    :param member: discord member object
+    :return: nothing
+    """
     print(f"Recognized that {member.name} joined")
     await client.get_channel(miniac_general_channel_id).send(f"Welcome to the Miniac Discord, {member.mention} Make sure to check out the <#537337389400719360> channel for all the information and rules!")
     print(f"Sent message about {member.name} to #general")
 
 @client.event
 async def on_message(message):
+    """
+    Discord event on receival of new messages.
+    :param message: discord message object
+    :return: nothing
+    """
     # Find string versions of the name and add them to a list
 
     if message.content.startswith('!add'):
@@ -503,6 +537,7 @@ async def on_message(message):
 
 @client.event
 async def on_ready():
+    """Discord event on successful connection."""
     print('Logged in as')
     print(client.user.name)
     print(client.user.id)
