@@ -7,7 +7,7 @@ Miniac Discord Bot
 import discord # pylint: disable=import-error
 import sqlite3
 import re
-import asyncio
+import asyncio #pylint: disable=unused-import
 import random
 from sqlite3 import Error
 
