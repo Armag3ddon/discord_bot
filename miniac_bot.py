@@ -601,26 +601,37 @@ async def save_meme(message):
     conn.close()
     return return_message
 
-def brian():
+def brian(message):
     """
     The !brian or !help message.
     :returns: message string
     """
     return_message = """
-    Hi, I'm Brian. You can call me Bryguy. I'm your friendly bot companion. Here are the commands you can do: \n
-    `!leaderboard`\n
-    This returns the current point totals for the top 10 painters on the discord server.\n
-    `!gallery [discord_user]`\n
-    This private messages you a discord user's personal gallery. These are all the pictures they've gotten points for. Make sure to actually tag the user, their name should appear blue.\n
-    `!points [discord_user]`\n
-    This command can be run with a parameter or without a parameter. If you want to find someone's point total, run "!points @[name-of-person]". If you want to know your own points, run "!points"\n
-    `!7years`\n
-    Never do this.\n
-    `!add [discord_user] [points] [link]`\n
-    Only Wight Kings and Thralls can run this command. This increments your point total by [points], and adds a new image to your gallery.\n
-    `!brian` or `!help`\n
-    This prints this message!
-    """
+Hi, I'm Brian. You can call me Bryguy. I'm your friendly bot companion. Here are the commands you can do:
+`!leaderboard`
+This returns the current point totals for the top 10 painters on the discord server.\n
+`!gallery [discord_user]`
+This private messages you a discord user's personal gallery. These are all the pictures they've gotten points for. Make sure to actually tag the user, their name should appear blue.\n
+`!points [discord_user]`
+This command can be run with a parameter or without a parameter. If you want to find someone's point total, run "!points @[name-of-person]". If you want to know your own points, run "!points"\n
+`!7years`
+Never do this.\n
+`!show_memes [year]`
+This private messages you saved Miniac memes for the given year (leave year blank for all memes).\n
+`!brian` or `!help`
+This prints this message!"""
+    roles = []
+    for role in message.author.roles:
+        roles.append(role.name)
+
+    if "Wight King" in roles or "Thrall" in roles:
+        return_message += """\n
+**Only Wight Kings and Thralls can run these commands:**
+`!add [discord_user] [points] [link]`
+This increments the user's point total by [points], and adds a new image to their gallery.\n
+`!meme [link]`
+Save a Miniac meme to the Miniac memes list! Current year will be autofilled."""
+
     return return_message
 
 # Custom welcome message
@@ -680,7 +691,7 @@ async def on_message(message):
             await message.author.send(f"{discord_message}")
 
     if message.content == "!brian" or message.content == "!help":
-        await message.channel.send(brian())
+        await message.channel.send(brian(message))
 
 @client.event
 async def on_ready():
