@@ -7,6 +7,7 @@ import sqlite3
 import re
 import asyncio #pylint: disable=unused-import
 import random
+import datetime
 from sqlite3 import Error
 
 import discord # pylint: disable=import-error
@@ -68,6 +69,53 @@ def create_leaderboard_table(conn):
             print(e)
     else:
         print("Error! Database connection was not established before creating leaderboard table.")
+
+def create_meme_table(conn):
+    """
+    Create the meme table if it doesn't exist.
+    :param conn: connection to database
+    :return: nothing
+    """
+    create_meme_query = """CREATE TABLE IF NOT EXISTS memes (
+                                    id integer PRIMARY KEY AUTOINCREMENT,
+                                    link text,
+                                    year integer NOT NULL
+                                  )"""
+    if conn is not None:
+        try:
+            with conn:
+                cur = conn.cursor()
+                cur.execute(create_meme_query)
+        except Error as e:
+            print("Failed to create meme table. The error is below.")
+            print(e)
+    else:
+        print("Error! Database connection was not established before creating meme table.")
+
+def insert_meme(link, conn):
+    """
+    Save a meme in the meme table.
+    :param link: a discord message link
+    :param conn: connection to database
+    :return: a message to send to discord
+    """
+    current_year = datetime.datetime.now().date().strftime("%Y")
+    insert_query = f"INSERT INTO 'memes' (link, year) VALUES ('{link}', '{current_year}')"
+    return_message = ''
+    if conn is not None:
+        try:
+            with conn:
+                cur = conn.cursor()
+                cur.execute(insert_query)
+                return_message = "Haha! This is a funny one."
+        except Error as e:
+            print("Failed to add meme. There error is below.")
+            print(e)
+            return_message = "Error. :sob:"
+    else:
+        print("Error! Database connection was not established before adding to a user's gallery.")
+        return_message = "Error. :sob:"
+    return return_message
 
 def insert_link(user, link, conn):
     """
@@ -211,6 +259,29 @@ def retrieve_gallery(user, conn):
     else:
         print("Error! Database connection was not established when querying a user's gallery.")
 
+def retrieve_memes(year, conn):
+    """
+    Returns the memes for a specific year or all of them.
+    :param year: Either a specific or "ALL"
+    :param conn: connection to the database
+    :return: returns a list of tuples
+    """
+    if year != "ALL":
+        get_memes_query = f"SELECT link, year FROM 'memes' WHERE year = {year}"
+    else:
+        get_memes_query = "SELECT link, year FROM 'memes'"
+
+    if conn is not None:
+        try:
+            cur = conn.cursor()
+            cur.execute(get_memes_query)
+            return cur.fetchall()
+        except Error as e:
+            print("Failed to retrieve memes. Error is below.")
+            print(e)
+    else:
+        print("Error! Database connection was not established when querying memes.")
+
 async def set_name(user_points, member_id):
     """
     Change the user's nickname to include the correct emoji based on their points.
@@ -351,7 +422,6 @@ async def increment_points_wrapper(message):
         return_message = 'You\'re missing a parameter. Please see the !brian documentation'
         return return_message
 
-
 def get_leaderboard():
     """
     Get a discord friendly leader message with up to 10 leaderboard members.
@@ -461,6 +531,76 @@ def get_gallery(message):
 
     return discord_private_message_list
 
+def get_memes(message):
+    """
+    Show all the memes for a specific year or just all memes
+    :param message: this is a discord message containing all the params to run this function
+    :return: a message to print out in discord
+    """
+    command_params = message.content.split()
+    if len(command_params) != 2:
+        year = "ALL"
+    else:
+        # sanitisation: years only contain numbers
+        year = re.sub('[^0-9]', '', command_params[1])
+
+    if year == '':
+        return ["Please give me a valid year or none at all."]
+
+    # establish a read-only database connection for extra security
+    conn = sqlite3.connect(f"file:{DATABASE}", uri=True)
+    memes = retrieve_memes(year, conn)
+    conn.close()
+
+    discord_private_message = ''
+    discord_private_message_list = []
+    index = 1
+    try:
+        for meme in memes:
+            new_message = f"{index}. {meme[0]} ({meme[1]})\n"
+            if (len(discord_private_message) + len(new_message) ) > 2000:
+                discord_private_message_list.append(discord_private_message)
+                discord_private_message = ""
+
+            discord_private_message += new_message
+            index += 1
+
+        # Append the final message that didn't make it to 2k characters
+        if discord_private_message != '':
+            discord_private_message_list.append(discord_private_message)
+    except TypeError:
+        discord_private_message_list.append("Something went wrong with fetching memes. Better call a Thrall!")
+
+    if not discord_private_message_list:
+        discord_private_message_list.append(f"No memes have been made in {year}. Sad times.")
+
+    return discord_private_message_list
+
+async def save_meme(message):
+    """
+    Save a Miniac meme for a yearly overview
+    :param message: a discord message object
+    """
+    # Only qualified people can add a meme
+    roles = []
+    for role in message.author.roles:
+        roles.append(role.name)
+
+    if "Wight King" not in roles and "Thrall" not in roles:
+        # ah ah ah!
+        return "The wrath of Clonk will be upon you."
+
+    # split out the various params
+    command_params = message.content.split()
+    if len(command_params) != 2:
+        return "Wrong usage! The command should be used like this: !meme <Discord message link>."
+
+    conn = sqlite3.connect(DATABASE)
+    create_meme_table(conn)
+    return_message = insert_meme(command_params[1], conn)
+    conn.close()
+    return return_message
+
 def brian():
     """
     The !brian or !help message.
@@ -528,10 +668,18 @@ async def on_message(message):
         await message.channel.send( 'https://i.imgur.com/9NYdTDj.gifv')
 
     if message.content.startswith('!points'):
-        await message.channel.send( get_points(message))
+        await message.channel.send(get_points(message))
+
+    if message.content.startswith("!meme"):
+        discord_message = await save_meme(message)
+        await message.channel.send(discord_message)
+
+    if message.content.startswith('!show_meme'):
+        discord_private_message_list = get_memes(message)
+        for discord_message in discord_private_message_list:
+            await message.author.send(f"{discord_message}")
 
     if message.content == "!brian" or message.content == "!help":
-        discord_message = brian()
         await message.channel.send(brian())
 
 @client.event
