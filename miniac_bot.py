@@ -427,7 +427,6 @@ def get_leaderboard():
     Get a discord friendly leader message with up to 10 leaderboard members.
     :return: leaderboard string
     """
-    discord_message = ''
     conn = sqlite3.connect(DATABASE)
     leaderboard = retrieve_sorted_leaderboard(conn)
     conn.close()
